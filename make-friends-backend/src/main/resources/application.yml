@@ -1,4 +1,4 @@
-server:
+﻿server:
   port: 8080
   servlet:
     context-path: /api
@@ -6,11 +6,38 @@ server:
 spring:
   application:
     name: make-friends-backend
+
+  # ========== MySQL + HikariCP（连接池 max=50，高并发核心）==========
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/make_friends?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/make_friends?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
     username: root
     password: Zhang20.
+    hikari:
+      maximum-pool-size: 50          # 最大连接数 = CPU*2 + 磁盘数，推荐 50~100
+      minimum-idle: 10                # 最小空闲连接
+      connection-timeout: 30000       # 获取连接超时 30s
+      idle-timeout: 600000            # 空闲 10min 回收
+      max-lifetime: 1800000           # 连接最长存活 30min（< MySQL wait_timeout）
+      pool-name: MakeFriendsHikariPool
+      leak-detection-threshold: 5000  # 连接泄露检测：占用 >5s 打印警告
+
+  # ========== Redis 8.x（Sa-Token + 热点缓存 + 限流）==========
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password:                      # 本机未设密码，留空；生产环境务必配置 requirepass
+      database: 0
+      timeout: 5s
+      client-type: lettuce
+      lettuce:
+        pool:
+          max-active: 32
+          max-idle: 8
+          min-idle: 2
+          max-wait: 3s
+
   servlet:
     multipart:
       enabled: true
@@ -23,19 +50,22 @@ spring:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # ========== 关闭控制台 SQL 打印（高并发 IO 杀手）==========
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
   global-config:
     db-config:
       id-type: auto
 
+# ========== Sa-Token：Token 存 Redis（重启后端不丢 + 多实例部署）==========
 sa-token:
   token-name: satoken
-  timeout: 2592000
+  timeout: 2592000                 # 30 天
   active-timeout: -1
   is-concurrent: true
   is-share: false
   token-style: uuid
   is-log: false
+  type: redis                       # ⭐ 核心：memory → redis
 
 springdoc:
   swagger-ui:
