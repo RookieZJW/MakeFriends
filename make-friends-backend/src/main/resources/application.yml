@@ -77,3 +77,69 @@ file:
   upload:
     path: ${user.dir}/uploads/
     url-prefix: /api/files/
+
+# ========== 第③层：Resilience4j 熔断/限流 ==========
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 20
+        minimum-number-of-calls: 8
+        failure-rate-threshold: 50
+        slow-call-duration-threshold: 3s
+        slow-call-rate-threshold: 60
+        wait-duration-in-open-state: 20s
+        permitted-number-of-calls-in-half-open-state: 5
+        record-exceptions:
+          - org.springframework.dao.CannotAcquireLockException
+          - org.springframework.dao.QueryTimeoutException
+          - org.springframework.dao.TransientDataAccessResourceException
+          - org.springframework.jdbc.CannotGetJdbcConnectionException
+          - java.net.SocketTimeoutException
+    instances:
+      mysql-default:
+        base-config: default
+      user-dynamic-db:
+        base-config: default
+        sliding-window-size: 30
+      chat-channel-db:
+        base-config: default
+        wait-duration-in-open-state: 10s
+  ratelimiter:
+    configs:
+      default:
+        limit-for-period: 50
+        limit-refresh-period: 1s
+        timeout-duration: 0
+    instances:
+      global-api:
+        base-config: default
+  retry:
+    configs:
+      default:
+        max-attempts: 2
+        wait-duration: 100ms
+        retry-exceptions:
+          - org.springframework.dao.CannotAcquireLockException
+          - org.springframework.dao.TransientDataAccessResourceException
+    instances:
+      mysql-retry:
+        base-config: default
+
+# ========== 自定义：限流阈值 ==========
+mf:
+  rate-limit:
+    enabled: true
+    ip-limit-per-min: 180
+    whitelist-ip:
+      - 127.0.0.1
+      - 0:0:0:0:0:0:0:1
+    whitelist-path-prefix:
+      - /actuator
+      - /swagger-ui
+      - /v3/api-docs
+      - /files
+      - /upload
+    login-fail-threshold: 5
+    login-fail-window-seconds: 60
+    login-lock-seconds: 600

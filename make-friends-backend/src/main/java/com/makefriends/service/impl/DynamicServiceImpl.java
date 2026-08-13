@@ -14,6 +14,8 @@ import com.makefriends.mapper.UserMapper;
 import com.makefriends.service.DynamicService;
 import com.makefriends.vo.DynamicVO;
 import org.springframework.beans.BeanUtils;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -36,6 +38,8 @@ public class DynamicServiceImpl implements DynamicService {
     }
 
     @Override
+    @CircuitBreaker(name = "user-dynamic-db")
+    @Retry(name = "mysql-retry")
     public DynamicVO publish(DynamicPublishDTO dto) {
         Long userId = StpUtil.getLoginIdAsLong();
         UserDynamic dynamic = new UserDynamic();
@@ -89,6 +93,8 @@ public class DynamicServiceImpl implements DynamicService {
     }
 
     @Override
+    @CircuitBreaker(name = "user-dynamic-db")
+    @Retry(name = "mysql-retry")
     public IPage<DynamicVO> getMyDynamics(int page, int size) {
         Long myId = StpUtil.getLoginIdAsLong();
         return getUserDynamics(myId, page, size);

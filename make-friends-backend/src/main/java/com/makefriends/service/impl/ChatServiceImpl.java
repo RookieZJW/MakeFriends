@@ -17,6 +17,8 @@ import com.makefriends.service.ChatService;
 import com.makefriends.vo.ChatSessionVO;
 import com.makefriends.websocket.ChatWebSocketHandler;
 import org.springframework.stereotype.Service;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -46,6 +48,8 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    @CircuitBreaker(name = "chat-channel-db")
+    @Retry(name = "mysql-retry")
     public List<ChatSessionVO> getSessions() {
         Long myId = StpUtil.getLoginIdAsLong();
         // 简单查询：只要包含我且 status=1 的会话
@@ -144,7 +148,9 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
+    @CircuitBreaker(name = "chat-channel-db")
+    @Retry(name = "mysql-retry")
     public ChatMessage sendMessage(SendMessageDTO dto) {
         Long senderId = StpUtil.getLoginIdAsLong();
         Long receiverId = dto.getReceiverId();

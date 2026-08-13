@@ -15,6 +15,8 @@ import com.makefriends.vo.LoginVO;
 import com.makefriends.vo.UserVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
+import com.makefriends.common.RateLimitService;
+import com.makefriends.common.TooManyRequestsException;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -28,9 +30,11 @@ public class UserServiceImpl implements UserService {
     private String uploadPath;
 
     private final UserMapper userMapper;
+    private final RateLimitService rateLimitService;
 
-    public UserServiceImpl(UserMapper userMapper) {
+    public UserServiceImpl(UserMapper userMapper, RateLimitService rateLimitService) {
         this.userMapper = userMapper;
+        this.rateLimitService = rateLimitService;
     }
 
     @Override
@@ -52,12 +56,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginVO login(LoginDTO dto) {
+        if (rateLimitService.isLoginLocked(dto.getPhone())) {
+            long remain = rateLimitService.loginLockRemainSeconds(dto.getPhone());
+            if (remain <= 0) remain = 600L;
+            throw new TooManyRequestsException("密码错误次数过多，账号已临时锁定", remain);
+        }
         User user = userMapper.selectOne(
                 new LambdaQueryWrapper<User>().eq(User::getPhone, dto.getPhone()));
         if (user == null) {
+            rateLimitService.onLoginFailed(dto.getPhone());
             throw new IllegalArgumentException("用户不存在");
         }
         if (!PasswordUtil.matches(dto.getPassword(), user.getPassword())) {
+            rateLimitService.onLoginFailed(dto.getPhone());
             throw new IllegalArgumentException("密码错误");
         }
         if (user.getStatus() != null && user.getStatus() == 0) {
@@ -68,6 +79,7 @@ public class UserServiceImpl implements UserService {
         user.setLastActiveAt(LocalDateTime.now());
         userMapper.updateById(user);
 
+        rateLimitService.onLoginSuccess(dto.getPhone());
         StpUtil.login(user.getId());
         LoginVO vo = new LoginVO();
         vo.setToken(StpUtil.getTokenValue());

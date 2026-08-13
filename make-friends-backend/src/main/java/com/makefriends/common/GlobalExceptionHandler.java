@@ -8,7 +8,11 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.stream.Collectors;
@@ -60,6 +64,31 @@ public class GlobalExceptionHandler {
         return Result.fail(409, "操作过于频繁，请勿重复提交");
     }
 
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public Result<Void> handleTooMany(TooManyRequestsException e, HttpServletResponse resp) {
+        long sec = e.getRetryAfterSeconds() <= 0 ? 60 : e.getRetryAfterSeconds();
+        resp.setHeader("Retry-After", String.valueOf(sec));
+        log.warn("[429] 限流触发: {}  retryAfter={}s", e.getMessage(), sec);
+        return Result.fail(429, e.getMessage() + "（" + sec + "秒后重试）");
+    }
+
+    @ExceptionHandler(CallNotPermittedException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public Result<Void> handleCBOpen(CallNotPermittedException e, HttpServletResponse resp) {
+        resp.setStatus(503);
+        log.warn("[CB-OPEN] 熔断打开：{}  快速失败避免雪崩", e.getMessage());
+        return Result.fail(503, "系统繁忙，请稍后重试");
+    }
+
+    @ExceptionHandler(io.github.resilience4j.ratelimiter.RequestNotPermitted.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public Result<Void> handleR4jRL(io.github.resilience4j.ratelimiter.RequestNotPermitted e, HttpServletResponse resp) {
+        resp.setStatus(429);
+        log.warn("[RL-R4J] Resilience4j RateLimiter 触发: {}", e.getMessage());
+        return Result.fail(429, "系统繁忙，请求被限流，请稍后重试");
+    }
     @ExceptionHandler(RuntimeException.class)
     public Result<Void> handleRuntimeException(RuntimeException e) {
         log.error("运行时异常: ", e);
