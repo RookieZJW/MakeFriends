@@ -145,7 +145,7 @@ node -v
 
 ### 2. 数据库配置
 
-本项目的数据库是 `make_friends`，包含 9 张表（users, user_dynamics, dynamic_comments, dynamic_likes, user_matches, chat_sessions, chat_messages, hobby_dict, occupation_dict），已有测试数据。
+本项目的数据库是 `make_friends`，包含 7 张表（users, user_dynamics, dynamic_comments, dynamic_likes, user_matches, chat_sessions, chat_messages），已有测试数据。
 
 **数据库连接参数：**
 
@@ -155,7 +155,7 @@ node -v
 | 端口 | 3306 |
 | 数据库名 | make_friends |
 | 用户名 | root |
-| 密码 | （请见 `application.yml`）|
+| 密码 | Zhang20. |
 
 > **注意：** 如果数据库不存在，请先登录 MySQL 创建：
 > ```sql
@@ -399,39 +399,7 @@ make-friends-frontend/
 
 ---
 
-
----
-
-## 聊天室特色功能
-
-### ① 7 套皮肤主题切换（持久化）
-
-聊天室右上角按钮打开主题面板，选择后立即通过 **CSS 变量**注入，保存在 localStorage，刷新仍生效。内置 7 套：樱花粉 / 薄荷绿 / 天空蓝 / 星夜紫 / 暖阳橙 / 奶咖色 / 极简白。
-
-### ② 分类表情包 + 最近使用
-
-输入框左侧按钮打开 **Teleport 挂载到 body** 的面板，提供 7 个分类：小黄脸 / 手势 / 动物 / 美食 / 运动 / 物件 / 爱心。最近使用保存在 localStorage（上限 24），插入时在光标位置精确插入。
-
-### ③ 历史消息分页懒加载
-
-进入聊天页首屏只加载最近 20 条消息，用户向上滑到顶部时自动加载更早的 20 条，prepend 到列表顶部并保持当前滚动位置不跳。顶部提示三态：上滑查看更早 → 加载中 → 以上就是全部历史消息了。轮询也会按已加载页数同步全量，不强制滚到底。
-
-### ④ 右键消息菜单
-
-支持「复制 / 转发 / 撤回（2分钟内，自己发的）」，使用 <Teleport to="body"> 渲染避免被父元素 overflow 截断。
-
----
-
-## 数据库表结构
-
-完整的 9 张表结构已导出至 make-friends-backend/sql/makefriends_schema.sql，可通过以下命令一键导入：
-
-`ash
-mysql -u root -p make_friends < make-friends-backend/sql/makefriends_schema.sql
-mysql -u root -p make_friends < make-friends-backend/sql/003_hobby_occupation_dict.sql
-`
-
-
+## 常见问题
 
 ### Q1: 后端启动报错 "Communications link failure"
 
@@ -439,7 +407,7 @@ mysql -u root -p make_friends < make-friends-backend/sql/003_hobby_occupation_di
 
 **解决方法：**
 1. 检查 MySQL 服务是否启动：`Get-Service MySQL80`
-2. 检查 `application.yml` 中的数据库密码是否正确
+2. 检查 `application.yml` 中的数据库密码是否正确（Zhang20.）
 3. 确保 MySQL 端口 3306 没有被占用
 
 ### Q2: 后端启动报错 "Address already in use"
@@ -552,4 +520,3 @@ Write-Host "`n测试账号: 13800000001 / Test123456" -ForegroundColor Magenta
 ## 许可证
 
 本项目仅供学习交流使用。
-

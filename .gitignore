@@ -1,0 +1,45 @@
+﻿# ========== MakeFriends 根目录 .gitignore ==========
+
+# --- Java / Maven 构建产物 ---
+**/target/
+**/*.class
+**/*.jar
+**/*.war
+**/build/
+**/out/
+
+# --- Node / 前端构建产物 ---
+**/node_modules/
+**/dist/
+**/dist-ssr/
+*.local
+.pnpm-store/
+
+# --- 上传文件目录（运行时生成，不入库）---
+**/uploads/
+
+# --- 日志 ---
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- 编辑器 & 系统 ---
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- 敏感配置 ---
+.env
+.env.local
+*.bak
+*.pyc

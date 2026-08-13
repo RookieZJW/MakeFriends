@@ -1,0 +1,9 @@
+package com.makefriends.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.makefriends.entity.UserMatch;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface UserMatchMapper extends BaseMapper<UserMatch> {
+}
