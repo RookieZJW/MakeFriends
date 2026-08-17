@@ -1,0 +1,149 @@
+# ==================== 生产环境配置 ====================
+# 启动时使用: java -jar make-friends-backend-1.0.0.jar --spring.profiles.active=prod
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: make-friends-backend-prod
+
+  # ========== MySQL ==========
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/make_friends?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+    username: root
+    password: CHANGE_ME_MYSQL_PASSWORD    # ⚠️ 部署时改成你的MySQL密码
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # ========== Redis ==========
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: CHANGE_ME_REDIS_PASSWORD   # ⚠️ 部署时改成你的Redis密码
+      database: 0
+      timeout: 5s
+      client-type: lettuce
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 4
+          min-idle: 1
+          max-wait: 3s
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 50MB
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+# ========== Sa-Token ==========
+sa-token:
+  token-name: satoken
+  timeout: 2592000
+  active-timeout: -1
+  is-concurrent: true
+  is-share: false
+  token-style: uuid
+  is-log: false
+  type: redis
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+# ========== 文件上传 ==========
+file:
+  upload:
+    path: /home/rokbj/uploads/      # ⚠️ 服务器上的上传目录
+    url-prefix: /api/files/
+
+# ========== 熔断/限流 ==========
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 20
+        minimum-number-of-calls: 8
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 20s
+        record-exceptions:
+          - org.springframework.dao.CannotAcquireLockException
+          - org.springframework.dao.QueryTimeoutException
+          - org.springframework.jdbc.CannotGetJdbcConnectionException
+          - java.net.SocketTimeoutException
+    instances:
+      mysql-default:
+        base-config: default
+      user-dynamic-db:
+        base-config: default
+      chat-channel-db:
+        base-config: default
+        wait-duration-in-open-state: 10s
+  ratelimiter:
+    configs:
+      default:
+        limit-for-period: 50
+        limit-refresh-period: 1s
+    instances:
+      global-api:
+        base-config: default
+  retry:
+    configs:
+      default:
+        max-attempts: 2
+        wait-duration: 100ms
+    instances:
+      mysql-retry:
+        base-config: default
+
+# ========== 自定义限流 ==========
+mf:
+  rate-limit:
+    enabled: true
+    ip-limit-per-min: 180
+    whitelist-ip:
+      - 127.0.0.1
+    whitelist-path-prefix:
+      - /actuator
+      - /swagger-ui
+      - /v3/api-docs
+      - /files
+      - /upload
+    login-fail-threshold: 5
+    login-fail-window-seconds: 60
+    login-lock-seconds: 600
+
+# ========== 日志配置 ==========
+logging:
+  level:
+    root: INFO
+    com.makefriends: INFO
+  file:
+    name: /home/rokbj/logs/backend.log
+  logback:
+    rollingpolicy:
+      max-file-size: 50MB
+      max-history: 30
+      total-size-cap: 1GB

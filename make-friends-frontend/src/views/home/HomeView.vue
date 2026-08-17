@@ -22,10 +22,22 @@
           <div class="float-heart h1">♡</div>
           <div class="float-heart h2">♥</div>
           <div class="float-heart h3">❤</div>
-          <div class="ring"></div>
           <span class="hex hex-1"></span>
           <span class="hex hex-2"></span>
           <span class="ring-2"></span>
+          <!-- 当前用户头像（带粉蓝渐变光晕+虚线旋转环） -->
+          <div class="avatar-wrap">
+            <div class="avatar-glow"></div>
+            <img
+              v-if="userStore.avatar"
+              class="user-avatar"
+              :src="resolveAvatarSrc(userStore.avatar)"
+              :alt="userStore.nickname"
+            />
+            <div v-else class="avatar-fallback">
+              {{ avatarInitial }}
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -137,6 +149,18 @@ const greeting = computed(() => {
   if (h < 18) return '下午好'
   return '晚上好'
 })
+
+// 取昵称第一个字/字母作为无头像时的兜底显示
+const avatarInitial = computed(() => {
+  const n = userStore.nickname || 'U'
+  return n.trim().charAt(0).toUpperCase()
+})
+function resolveAvatarSrc(src) {
+  if (!src) return ''
+  if (src.startsWith('http') || src.startsWith('data:')) return src
+  if (src.startsWith('/')) return src
+  return '/' + src
+}
 
 function setUserLikedById(userId, liked) {
   const uid = String(userId)
@@ -304,15 +328,7 @@ onMounted(async () => {
   height: 180px;
   flex-shrink: 0;
 
-  .ring {
-    position: absolute;
-    inset: 30px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #5B8DEF, #FFB5C5);
-    opacity: 0.15;
-  }
-
-  .float-heart {
+    .float-heart {
     position: absolute;
     font-size: 28px;
     color: #F08DA5;
@@ -320,6 +336,57 @@ onMounted(async () => {
   .h1 { top: 0; left: 10%; }
   .h2 { top: 40%; right: 0; color: #5B8DEF; }
   .h3 { bottom: 0; left: 30%; }
+
+  /* 用户头像容器 */
+  .avatar-wrap {
+    position: absolute;
+    inset: 26px;
+    border-radius: 50%;
+    overflow: hidden;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9),
+                0 8px 32px rgba(91, 141, 239, 0.25);
+  }
+  .avatar-glow {
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #5B8DEF 0%, #FFB5C5 100%);
+    opacity: 0.22;
+    filter: blur(2px);
+    animation: pulse-glow 6s ease-in-out infinite;
+    z-index: 0;
+  }
+  .user-avatar {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .avatar-fallback {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #7FA6F5 0%, #FFC1CF 100%);
+    letter-spacing: 1px;
+  }
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.22; transform: scale(1); }
+  50%      { opacity: 0.38; transform: scale(1.04); }
 }
 
 /* 筛选条 */
@@ -554,7 +621,10 @@ onMounted(async () => {
   .hero-inner { gap: 24px; flex-direction: column; align-items: flex-start; }
   .hero-text .hero-title { font-size: 28px; }
   .hero-text .hero-desc { font-size: 15px; }
-  .hero-illu { width: 140px; height: 140px; order: -1; margin: 0 auto; }
+  .hero-illu { width: 140px; height: 140px; order: -1; margin: 0 auto;
+    .avatar-wrap { inset: 20px; }
+    .avatar-fallback { font-size: 34px; }
+  }
   .user-grid { gap: 14px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
   .filter-card { padding: 14px 16px; }
 }
@@ -564,7 +634,11 @@ onMounted(async () => {
   .hero-text .hero-title { font-size: 22px; margin-bottom: 10px; }
   .hero-text .hero-desc { font-size: 14px; margin-bottom: 14px; }
   .hero-tags .tag { padding: 5px 12px; font-size: 12px; }
-  .hero-illu { width: 110px; height: 110px; .float-heart { font-size: 22px; } }
+  .hero-illu { width: 110px; height: 110px;
+    .float-heart { font-size: 22px; }
+    .avatar-wrap { inset: 16px; }
+    .avatar-fallback { font-size: 26px; }
+  }
   .filter-bar { margin-top: -12px; }
   .filter-card { padding: 12px; border-radius: 12px; }
   .filter-row { gap: 10px; }

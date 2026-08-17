@@ -10,8 +10,8 @@
     <div class="login-card">
       <div class="brand">
         <div class="brand-logo">♡</div>
-        <h1 class="brand-title gradient-text">MakeFriends</h1>
-        <p class="brand-sub">遇见有趣的人，开启心动故事</p>
+        <h1 class="brand-title gradient-text">搭伴</h1>
+        <p class="brand-sub">校园好搭伴，生活不孤单</p>
       </div>
 
       <el-form ref="formRef" :model="form" :rules="rules" size="large" @submit.prevent="onLogin">
@@ -58,7 +58,7 @@
       </div>
     </div>
 
-    <p class="copyright">© 2026 MakeFriends · 让每一份心动都有回响</p>
+    <p class="copyright">© 2026 搭伴 · 校园好搭伴，生活不孤单</p>
   </div>
 </template>
 

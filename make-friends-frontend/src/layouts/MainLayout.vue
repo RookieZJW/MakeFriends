@@ -4,8 +4,8 @@
     <header class="navbar">
       <div class="nav-inner">
         <div class="logo" @click="router.push('/home')">
-          <span class="logo-icon">♡</span>
-          <span class="logo-text gradient-text">MakeFriends</span>
+          <span class="logo-mark">搭</span>
+          <span class="logo-text">搭伴</span>
         </div>
 
         <nav class="menu">
@@ -29,6 +29,9 @@
         </nav>
 
         <div class="nav-right">
+          <button class="pub-btn" @click="router.push('/dynamic/publish')">
+            <el-icon><Plus /></el-icon><span>发布</span>
+          </button>
           <el-dropdown trigger="click" @command="onCommand">
             <div class="avatar-wrap">
               <el-avatar :size="38" :src="avatarUrl" />
@@ -66,7 +69,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   House, PictureRounded, ChatDotRound, Connection, User,
-  ArrowDown, Edit, SwitchButton
+  ArrowDown, Edit, SwitchButton, Plus
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { resolveAvatar } from '@/utils/format'
@@ -132,57 +135,72 @@ onMounted(() => {
   min-height: 100vh;
   position: relative;
   z-index: 1;
-  /* 让 App.vue 的动态背景透出来 */
   background: transparent;
 }
 
+/* ==================== 导航栏 ==================== */
 .navbar {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: saturate(180%) blur(16px);
-  -webkit-backdrop-filter: saturate(180%) blur(16px);
-  border-bottom: 1px solid rgba(255, 107, 157, 0.12);
-  box-shadow: 0 2px 12px rgba(168, 85, 247, 0.05);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(91, 141, 239, 0.08);
+  transition: box-shadow 0.3s ease;
 }
 
 .nav-inner {
   max-width: 1200px;
   margin: 0 auto;
-  height: 64px;
+  height: 60px;
   padding: 0 24px;
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 32px;
 }
 
+/* ===== Logo ===== */
 .logo {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
   flex-shrink: 0;
 
-  .logo-icon {
-    font-size: 26px;
-    background: linear-gradient(135deg, #ff6b9d 0%, #a855f7 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .logo-text {
-    font-size: 22px;
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #5B8DEF 0%, #FFB5C5 100%);
+    color: #fff;
+    font-size: 16px;
     font-weight: 800;
-    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(91, 141, 239, 0.3);
+    transition: transform 0.2s ease;
+  }
+
+  &:hover .logo-mark {
+    transform: scale(1.06) rotate(-3deg);
+  }
+
+  .logo-text {
+    font-size: 18px;
+    font-weight: 800;
+    color: #2F3443;
+    letter-spacing: 1px;
   }
 }
 
+/* ===== 菜单 ===== */
 .menu {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
 }
 
 .menu-item {
@@ -190,49 +208,87 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 9px 18px;
-  border-radius: 999px;
-  font-size: 15px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 500;
-  color: #6a6a7a;
+  color: #6B7280;
   cursor: pointer;
-  transition: all 0.28s ease;
+  transition: all 0.2s ease;
 
   .el-icon {
     font-size: 17px;
   }
 
   &:hover {
-    color: #ff4f8b;
-    background: linear-gradient(135deg, #fff0f5 0%, #f3e8ff 100%);
+    color: #2F3443;
+    background: rgba(91, 141, 239, 0.06);
   }
 
   &.active {
-    color: #fff;
-    background: linear-gradient(135deg, #ff6b9d 0%, #a855f7 100%);
-    box-shadow: 0 5px 14px rgba(255, 107, 157, 0.35);
+    color: #5B8DEF;
+    font-weight: 600;
+    background: transparent;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 16px;
+      right: 16px;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #5B8DEF, #FFB5C5);
+    }
   }
 
   .badge {
     position: absolute;
     top: 2px;
     right: 6px;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
     border-radius: 999px;
     background: #f43f5e;
     color: #fff;
-    font-size: 11px;
-    line-height: 18px;
+    font-size: 10px;
+    line-height: 16px;
     text-align: center;
     font-weight: 700;
     border: 1.5px solid #fff;
   }
 }
 
+/* ===== 右侧区域 ===== */
 .nav-right {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pub-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #5B8DEF 0%, #7FA6F5 100%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 12px rgba(91, 141, 239, 0.28);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(91, 141, 239, 0.38);
+  }
+
+  .el-icon { font-size: 15px; }
 }
 
 .avatar-wrap {
@@ -240,21 +296,24 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  padding: 4px 10px 4px 4px;
+  padding: 3px 10px 3px 3px;
   border-radius: 999px;
-  transition: background 0.25s;
+  transition: background 0.2s;
+
   &:hover {
-    background: #fff0f5;
+    background: rgba(91, 141, 239, 0.06);
   }
+
   .nick {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: #3a3a4a;
-    max-width: 90px;
+    max-width: 80px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
   .caret {
     font-size: 12px;
     color: #aaa;
@@ -262,70 +321,63 @@ onMounted(() => {
 }
 
 .content {
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 60px);
 }
 
-/* =========================================
-   MainLayout 响应式（3 级断点）
-   ========================================= */
-
-/* 平板/大屏手机：≤1023px */
+/* ==================== 响应式 ==================== */
 @media (max-width: 1023px) {
   .nav-inner {
     max-width: 100%;
     padding: 0 16px;
-    gap: 18px;
+    gap: 16px;
   }
-  .logo .logo-text { font-size: 18px; }
-  .menu { gap: 2px; justify-content: center; }
+  .logo .logo-text { font-size: 16px; }
+  .menu { gap: 0; }
   .menu-item {
     padding: 8px 12px;
-    font-size: 14px;
+    font-size: 13px;
   }
+  .pub-btn { padding: 6px 12px; font-size: 12px; }
+  .pub-btn span { display: none; }
+  .avatar-wrap .nick { display: none; }
 }
 
-/* 手机：≤767px（隐藏菜单/昵称文字，只留图标，顶栏变紧凑） */
 @media (max-width: 767px) {
   .nav-inner {
-    height: 54px;
+    height: 52px;
     padding: 0 10px;
-    gap: 6px;
+    gap: 4px;
   }
   .logo { gap: 4px; }
-  .logo .logo-icon { font-size: 22px; }
-  .logo .logo-text { font-size: 16px; }
+  .logo .logo-mark { width: 28px; height: 28px; font-size: 14px; border-radius: 8px; }
+  .logo .logo-text { font-size: 15px; }
 
   .menu { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
   .menu::-webkit-scrollbar { display: none; }
   .menu-item {
     padding: 7px 10px;
-    font-size: 0;   /* 隐藏文字的 <span>，仅显示 icon */
+    font-size: 0;
     gap: 0;
     .el-icon { font-size: 18px; }
     span:not(.badge) { display: none; }
     .badge { right: 2px; top: 0; }
+
+    &.active::after { display: none; }
+    &.active { background: rgba(91, 141, 239, 0.1); border-radius: 8px; }
   }
 
-  .avatar-wrap {
-    padding: 4px 6px 4px 4px;
-    .nick { display: none; }
+  .pub-btn {
+    padding: 6px 10px;
+    .el-icon { font-size: 16px; }
   }
-  .content { min-height: calc(100vh - 54px); }
+  .avatar-wrap { padding: 3px; }
+  .content { min-height: calc(100vh - 52px); }
 }
 
-/* 小屏手机：≤479px */
 @media (max-width: 479px) {
-  .nav-inner {
-    height: 50px;
-    padding: 0 8px;
-    gap: 4px;
-  }
-  .logo .logo-text {
-    display: none;  /* 最窄屏直接隐藏文字，只保留 ♡ logo 图标 */
-  }
-  .menu-item {
-    padding: 7px 8px;
-  }
-  .content { min-height: calc(100vh - 50px); }
+  .nav-inner { padding: 0 8px; gap: 2px; }
+  .logo .logo-text { display: none; }
+  .menu-item { padding: 7px 8px; }
+  .pub-btn { padding: 5px 8px; }
 }
 </style>

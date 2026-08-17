@@ -97,7 +97,7 @@ const router = createRouter({
 
 // 全局前置守卫
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title ? `${to.meta.title} · MakeFriends` : 'MakeFriends'
+  document.title = to.meta.title ? `${to.meta.title} · 搭伴` : '搭伴'
   const userStore = useUserStore()
   if (to.meta.requireAuth && !userStore.isLogin) {
     next({ path: '/login', query: { redirect: to.fullPath } })

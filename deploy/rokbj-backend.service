@@ -1,0 +1,48 @@
+# ============================================================
+# 搭伴后端服务 (systemd)
+# 位置: /etc/systemd/system/rokbj-backend.service
+# ============================================================
+
+[Unit]
+Description=RokBJ Backend Service (搭伴后端)
+After=network.target mysql.service redis.service
+Requires=network.target
+
+[Service]
+Type=simple
+User=rokbj
+Group=rokbj
+
+# 工作目录（jar 包所在目录）
+WorkingDirectory=/home/rokbj/backend
+
+# 启动命令（使用生产环境配置）
+ExecStart=/usr/bin/java -Xms256m -Xmx512m \
+    -jar /home/rokbj/backend/make-friends-backend-1.0.0.jar \
+    --spring.profiles.active=prod
+
+# 停止命令
+ExecStop=/bin/kill -SIGTERM $MAINPID
+
+# 自动重启（崩溃后自动拉起）
+Restart=on-failure
+RestartSec=5
+
+# 开机自启
+# 设置为 yes 后，系统启动时会自动运行
+# 需要手动执行: systemctl enable rokbj-backend
+
+# 资源限制（2核2G服务器，保守配置）
+# CPUQuota=150%
+# MemoryMax=1g
+
+# 环境变量
+Environment="SPRING_PROFILES_ACTIVE=prod"
+
+# 标准输出/错误 → 日志
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rokbj-backend
+
+[Install]
+WantedBy=multi-user.target

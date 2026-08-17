@@ -10,8 +10,8 @@
     <div class="register-card">
       <div class="brand">
         <div class="brand-logo">♡</div>
-        <h1 class="brand-title gradient-text">加入 MakeFriends</h1>
-        <p class="brand-sub">创建账号，开启你的缘分之旅</p>
+        <h1 class="brand-title gradient-text">加入搭伴</h1>
+        <p class="brand-sub">创建账号，开启你的校园搭伴之旅</p>
       </div>
 
       <el-form ref="formRef" :model="form" :rules="rules" size="large" label-position="top">
@@ -83,7 +83,7 @@
       </div>
     </div>
 
-    <p class="copyright">© 2026 MakeFriends · 让每一份心动都有回响</p>
+    <p class="copyright">© 2026 搭伴 · 校园好搭伴，生活不孤单</p>
   </div>
 </template>
 

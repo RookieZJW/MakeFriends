@@ -1,0 +1,44 @@
+# ============================================================
+# 搭伴 (rokbj.me) - Cloudflare Tunnel 配置模板
+# ============================================================
+# ⚠️ 这是 TEMPLATE（模板）！需要把里面的占位符替换成你自己的：
+#   - xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx → 你的 Tunnel ID
+#   - 你的用户名 → Windows 登录用户名（比如 25803）
+#
+# 修改完后，复制到：C:\Users\你的用户名\.cloudflared\config.yml
+#
+# 验证命令：
+#   cloudflared tunnel ingress validate
+# ============================================================
+
+# ⚠️ 替换成你的 Tunnel ID（比如 557754ad-8013-4d31-97f0-76e679cf3e76）
+tunnel: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+# ⚠️ 替换"你的用户名"为你的 Windows 用户名，Tunnel ID 和上面保持一致
+credentials-file: C:\Users\你的用户名\.cloudflared\xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.json
+
+# ============================================================
+# Ingress 规则（按顺序匹配，第一个匹配到的生效）
+# ============================================================
+ingress:
+  # 1. 后端 API 请求（/api/*）→ 转到 Spring Boot 8080
+  - hostname: rokbj.me
+    path: /api/.*
+    service: http://localhost:8080
+
+  # 2. WebSocket 聊天请求（/ws/*）→ 转到 Spring Boot 8080
+  - hostname: rokbj.me
+    path: /ws/.*
+    service: http://localhost:8080
+
+  # 3. 主站其他所有请求 → 转到 Nginx 80（前端静态文件）
+  - hostname: rokbj.me
+    service: http://localhost:80
+
+  # 4. www 子域名 → 也转到 Nginx 80
+  - hostname: www.rokbj.me
+    service: http://localhost:80
+
+  # 5. 兜底（所有其他未匹配的请求，返回 404）
+  # ⚠️ 必须保留，否则 cloudflared 启动报错
+  - service: http_status:404
